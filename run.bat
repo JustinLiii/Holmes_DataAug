@@ -1,3 +1,4 @@
+@echo off
 SET batch_start=0
 SET batch_end=5
 
