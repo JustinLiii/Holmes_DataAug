@@ -1,7 +1,10 @@
 # Data Aug
 超绝牛逼半自动脚本
 
-即刻运行`run.bat`（别忘了修改其中的start & end）
+```powershell
+.\run.bat [batch_start] [batch_end]
+```
+
 即可执行：
 1. 生成请求 (make_batch_file.py)
 2. 上传请求 (upload_batch_file.py)
@@ -12,4 +15,3 @@
 
 > [!WARNING]
 > 运行完毕后别忘了清理你的bos噢 :)
-> 
