@@ -14,12 +14,6 @@ if not "%3"=="" (
     exit /b
 )
 
-if not exist .venv (
-    echo Invalid virtual environment, please set up or configure
-)
-
-.venv\Scripts\activate
-
 SET batch_start=%1
 SET batch_end=%2
 
@@ -36,4 +30,4 @@ python start_batch.py --start %batch_start% --end %batch_end%
 ECHO Batch task started
 
 ECHO Downloading batch task
-python download_batch.py
+python download_batch.py --start %batch_start% --end %batch_end%

@@ -2,6 +2,7 @@
 超绝牛逼半自动脚本
 
 ```powershell
+.\.venv\Scripts\activate
 .\run.bat [batch_start] [batch_end]
 ```
 
