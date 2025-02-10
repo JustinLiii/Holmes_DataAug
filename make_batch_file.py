@@ -4,14 +4,14 @@ import uuid
 from dataclasses import dataclass
 from concurrent.futures import ProcessPoolExecutor
 
-from datasets import load_dataset
+import pyarrow.dataset as ds
 from tqdm import tqdm
 
-MAX_BATCH_NUM=50000
+MAX_BATCH_NUM=60000
 # MAX_BATCH_NUM=10
-MAX_BATCH_SIZE=100*1024*1024
+# MAX_BATCH_SIZE=100*1024*1024
 
-DATASET_SIZE = 55353453 # fineweb-cn(Insdustrial+Tele)
+# DATASET_SIZE = 55353453 # fineweb-cn(Insdustrial+Tele)
 
 @dataclass
 class PromptTemplate:
@@ -74,34 +74,27 @@ def enhance(template: type[PromptTemplate], text: str) -> str:
     
     return json.dumps(request, ensure_ascii=False)
     
-def main(start = MAX_BATCH_NUM):
-    dataset = load_dataset(
-        'opencsg/chinese-fineweb-edu', 
-        split='train', 
-        streaming=True,
-        cache_dir='cache')
-    
+def make_one_file(start: int, target_dir: str, dataset_dir: str="E:\\Projects\\HolmesLM\\dataset\\4_5"):
+    dataset = ds.dataset(dataset_dir, format='parquet')
+    scanner = ds.Scanner.from_dataset(
+        dataset, 
+        columns=['text'], 
+        filter=ds.field('source') != 'SkyPile')
+    text = scanner.take(range(start, start+MAX_BATCH_NUM)).column('text')
+
     template_choices = random.choices(
         [CorrectQA, WrongQA, Translation],
         weights=PROB,
         k=MAX_BATCH_NUM
     )
-    
-    dataset_iter = iter(dataset)
-    
-    for i in range(start):
-        next(dataset_iter)
-    
+
     with ProcessPoolExecutor(max_workers=6) as executor:
-        with open('batch1.jsonl', 'w', encoding='utf-8') as f:
+        with open(target_dir, 'w', encoding='utf-8') as f:
             futures = []
             for i in tqdm(range(MAX_BATCH_NUM), desc='Submitting Tasks'):
-                text = next(dataset_iter)['text']
+                text = next(text)
                 template = template_choices[i]
                 future = executor.submit(enhance, template, text)
                 futures.append(future)
             for future in tqdm(futures, desc='Getting Results'):
                 f.write(future.result()+'\n')
-                
-if __name__ == '__main__':
-    main()
