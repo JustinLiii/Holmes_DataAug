@@ -11,8 +11,6 @@ from tqdm import tqdm
 
 load_dotenv()
 
-def main():
-
 #设置BosClient的Host，Access Key ID和Secret Access Key
 bos_host = "gz.bcebos.com"
 access_key_id = os.getenv("QIANFAN_ACCESS_KEY")

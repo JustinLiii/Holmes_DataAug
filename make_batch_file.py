@@ -8,8 +8,7 @@ import pyarrow.dataset as ds
 from tqdm import tqdm
 
 MAX_BATCH_NUM=60000
-# MAX_BATCH_NUM=10
-# MAX_BATCH_SIZE=100*1024*1024
+MAX_JOB_NUM=5
 
 # DATASET_SIZE = 55353453 # fineweb-cn(Insdustrial+Tele)
 
@@ -80,7 +79,7 @@ def make_one_file(start: int, target_dir: str, dataset_dir: str="E:\\Projects\\H
         dataset, 
         columns=['text'], 
         filter=ds.field('source') != 'SkyPile')
-    text = scanner.take(range(start, start+MAX_BATCH_NUM)).column('text')
+    lines = scanner.take(range(start, start+MAX_BATCH_NUM)).column('text')
 
     template_choices = random.choices(
         [CorrectQA, WrongQA, Translation],
@@ -92,9 +91,16 @@ def make_one_file(start: int, target_dir: str, dataset_dir: str="E:\\Projects\\H
         with open(target_dir, 'w', encoding='utf-8') as f:
             futures = []
             for i in tqdm(range(MAX_BATCH_NUM), desc='Submitting Tasks'):
-                text = next(text)
+                text = str(lines[i])
                 template = template_choices[i]
                 future = executor.submit(enhance, template, text)
                 futures.append(future)
             for future in tqdm(futures, desc='Getting Results'):
                 f.write(future.result()+'\n')
+                
+def main(start = 0):
+    for i in range(start, start+MAX_JOB_NUM):
+        make_one_file(i*MAX_BATCH_NUM, f'batch{i}.jsonl')
+
+if __name__ == '__main__':
+    main(0)
