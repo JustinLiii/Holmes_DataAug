@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from baidubce.bce_client_configuration import BceClientConfiguration
 from baidubce.auth.bce_credentials import BceCredentials
 from baidubce.services.bos.bos_client import BosClient
+from baidubce import utils
 from qianfan import resources
 from tqdm import tqdm
 from fire import Fire
@@ -71,15 +72,20 @@ def download_output(task_output_uri):
     object_keys = []
     for uri in task_output_uri:
         object_keys.extend([obj.key for obj in bos_client.list_all_objects(bucket_name, prefix=uri)])
-    with tqdm(total=len(object_keys)) as pbar:
-        tasks = []
-        for key in object_keys:
-            file_name = key.split('/')[-1]
-            file_name = os.path.join('desc', file_name)
-            t = asyncio.create_task(bos_client.get_object_to_file(bucket_name, key, file_name))
-            t.add_done_callback(lambda _: pbar.update(1))
-            tasks.append(t)
-        asyncio.gather(*tasks)
+    # with tqdm(total=len(object_keys)) as pbar:
+    #     tasks = []
+    #     for key in object_keys:
+    #         file_name = key.split('/')[-1]
+    #         file_name = os.path.join('desc', file_name)
+    #         t = asyncio.create_task(bos_client.get_object_to_file(bucket_name, key, file_name))
+    #         t.add_done_callback(lambda _: pbar.update(1))
+    #         tasks.append(t)
+    #     asyncio.gather(*tasks)
+    for key in object_keys:
+        file_name = key.split('/')[-1]
+        file_name = os.path.join('desc', file_name)
+        print(f"Downloading {key} to {file_name}")
+        bos_client.get_object_to_file(bucket_name, key, file_name, progress_callback=utils.default_progress_callback)
         
 
 def main(start, end):
@@ -90,9 +96,9 @@ def main(start, end):
             break
         time.sleep(120)
     
-    make_toast("Task Done")
+    make_toast(f"Task {start} to {end} Done")
     download_output(task_output_uri)
-    make_toast("Download Complete")
+    make_toast(f"Download Complete for Task {start} to {end}")
     
 if __name__ == '__main__':
     Fire(main)
