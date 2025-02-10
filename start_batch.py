@@ -30,9 +30,12 @@ async def creat_task(i):
 
 async def create(start: int, end: int):
     with tqdm(total=end-start) as pbar:
+        tasks = []
         for i in range(start, end):
             t = asyncio.create_task(creat_task(i))
             t.add_done_callback(lambda _: pbar.update(1))
+            tasks.append(t)
+        await asyncio.gather(*tasks)
 
 def main(start, end):
     asyncio.run(create(start, end))

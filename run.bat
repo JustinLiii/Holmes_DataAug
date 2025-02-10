@@ -15,4 +15,4 @@ python start_batch.py --start %batch_start% --end %batch_end%
 ECHO Batch task started
 
 ECHO Downloading batch task
-download_batch.py
+python download_batch.py

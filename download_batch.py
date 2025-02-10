@@ -45,19 +45,20 @@ def check_task():
         # 请查看本文请求参数说明，根据实际使用选择参数；对应API调用文档-请求参数-Body参数
         {}
     )
-    task_output_uri = [task.outputBosUri for task in resp.body.result.taskList]
+    task_output_uri = [task["outputBosUri"] for task in resp.body["result"]["taskList"]]
     
     done = True
-    for task in resp.body.result.taskList:
-        status = task.runStatus
+    for task in resp.body["result"]["taskList"]:
+        status = task["runStatus"]
         if status == 'Done':
             continue
-        elif status in ['Stopped', 'Failed', 'Expired']:
-            make_toast(f"Task {task.name} failed in status {status}")
-            raise RuntimeError(f"Task {task.name} failed in status {status}")
-        else:
-            done = False
-            break
+        
+        if status in ['Stopped', 'Failed', 'Expired']:
+            make_toast(f"Task {task["name"]} failed in status {status}")
+            raise RuntimeError(f"Task {task["name"]} failed in status {status}")
+        
+        done = False
+        break
         
     print(f"Task status: {'Done' if done else 'Running'}")
     return done, task_output_uri
