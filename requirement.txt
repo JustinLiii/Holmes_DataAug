@@ -4,3 +4,5 @@ backoff
 datasets
 qianfan
 bce-python-sdk
+fire
+windows-toasts

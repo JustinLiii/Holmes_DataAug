@@ -33,5 +33,10 @@ async def create(start: int, end: int):
         for i in range(start, end):
             t = asyncio.create_task(creat_task(i))
             t.add_done_callback(lambda _: pbar.update(1))
-            
-asyncio.run(create(6, 7))
+
+def main(start, end):
+    asyncio.run(create(start, end))
+
+if __name__ == '__main__':
+    import fire
+    fire.Fire(main)

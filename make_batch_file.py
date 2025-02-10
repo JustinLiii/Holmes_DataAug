@@ -6,8 +6,9 @@ from concurrent.futures import ProcessPoolExecutor
 
 import pyarrow.dataset as ds
 from tqdm import tqdm
+from fire import Fire
 
-MAX_BATCH_NUM=60000
+MAX_BATCH_NUM=30000
 MAX_JOB_NUM=5
 
 # DATASET_SIZE = 55353453 # fineweb-cn(Insdustrial+Tele)
@@ -98,9 +99,9 @@ def make_one_file(start: int, target_dir: str, dataset_dir: str="E:\\Projects\\H
             for future in tqdm(futures, desc='Getting Results'):
                 f.write(future.result()+'\n')
                 
-def main(start = 0):
-    for i in range(start, start+MAX_JOB_NUM):
-        make_one_file(i*MAX_BATCH_NUM, f'batch{i}.jsonl')
+def main(start = 0, end = 0 + MAX_JOB_NUM):
+    for i in range(start, end):
+        make_one_file(i*MAX_BATCH_NUM, f'src/batch{i}.jsonl')
 
 if __name__ == '__main__':
-    main(0)
+    Fire(main)
